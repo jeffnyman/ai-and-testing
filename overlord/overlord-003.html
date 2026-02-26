@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Overlord - Business is Booming!</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+    
+    :root {
+      --danger-red: #d32f2f;
+      --danger-dark: #b71c1c;
+      --success-green: #388e3c;
+      --warning-amber: #f57c00;
+      --panel-bg: #1a1a1a;
+      --panel-border: #333;
+      --text-primary: #e0e0e0;
+      --text-danger: #ff5252;
+      --text-success: #69f0ae;
+      --display-bg: #0a0a0a;
+      --keypad-bg: #2a2a2a;
+      --keypad-hover: #3a3a3a;
+      --glow-red: rgba(211, 47, 47, 0.4);
+      --glow-green: rgba(105, 240, 174, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 2rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(255, 255, 255, 0.02) 2px,
+          rgba(255, 255, 255, 0.02) 4px
+        );
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--danger-red);
+      text-shadow: 0 0 20px var(--glow-red), 0 0 40px var(--glow-red);
+      animation: pulseTitle 3s ease-in-out infinite;
+    }
+    
+    @keyframes pulseTitle {
+      0%, 100% { text-shadow: 0 0 20px var(--glow-red), 0 0 40px var(--glow-red); }
+      50% { text-shadow: 0 0 30px var(--glow-red), 0 0 60px var(--glow-red); }
+    }
+    
+    .tagline {
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      color: var(--text-primary);
+      opacity: 0.8;
+    }
+    
+    .tagline strong {
+      color: var(--danger-red);
+      text-decoration: underline;
+    }
+    
+    .screen {
+      display: none;
+    }
+    
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Setup Screen */
+    .setup-panel {
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    .setup-panel h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--warning-amber);
+      text-align: center;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .form-group .default {
+      display: block;
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+      font-style: italic;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--display-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--danger-red);
+      box-shadow: 0 0 10px var(--glow-red);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-danger {
+      background: var(--danger-red);
+      color: white;
+      box-shadow: 0 4px 15px var(--glow-red);
+    }
+    
+    .btn-danger:hover {
+      background: var(--danger-dark);
+      box-shadow: 0 6px 25px var(--glow-red);
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger:active {
+      transform: translateY(0);
+    }
+    
+    /* Bomb Screen */
+    .bomb-components {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .bomb-components {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .component {
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Trigger Component */
+    .status-indicator {
+      text-align: center;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+    
+    .status-indicator.active {
+      background: var(--danger-red);
+      color: white;
+      box-shadow: 0 0 20px var(--glow-red);
+    }
+    
+    .status-indicator.inactive {
+      background: var(--success-green);
+      color: white;
+      box-shadow: 0 0 20px var(--glow-green);
+    }
+    
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .error-message {
+      color: var(--text-danger);
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      min-height: 1.2rem;
+      animation: errorFlash 0.5s ease-in;
+    }
+    
+    @keyframes errorFlash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    
+    .code-display {
+      background: var(--display-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .code-display input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.5em;
+    }
+    
+    .code-display input:focus {
+      outline: none;
+    }
+    
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+    
+    .keypad button {
+      padding: 1rem;
+      background: var(--keypad-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .keypad button:hover {
+      background: var(--keypad-hover);
+      transform: scale(1.05);
+    }
+    
+    .keypad button:active {
+      transform: scale(0.95);
+    }
+    
+    .keypad .delete-btn {
+      background: var(--warning-amber);
+      color: white;
+    }
+    
+    .keypad .action-btn {
+      background: var(--danger-red);
+      color: white;
+      grid-column: span 2;
+      font-size: 1.1rem;
+    }
+    
+    .keypad .action-btn:hover {
+      background: var(--danger-dark);
+      box-shadow: 0 0 15px var(--glow-red);
+    }
+    
+    /* Timer Component */
+    .timer-display {
+      background: var(--display-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 2rem 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    
+    .timer-display input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-danger);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      text-align: center;
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 20px var(--glow-red);
+    }
+    
+    .timer-display.warning input {
+      animation: timerBlink 1s linear infinite;
+    }
+    
+    @keyframes timerBlink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.3; }
+    }
+    
+    /* Device Component */
+    .device {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    
+    .bomb-image {
+      width: 100%;
+      max-width: 200px;
+      height: auto;
+      filter: drop-shadow(0 0 20px rgba(211, 47, 47, 0.3));
+      animation: bombFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes bombFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    /* Detonation Screen */
+    .detonation-screen {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    
+    .detonation-screen h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: var(--danger-red);
+      animation: shake 0.5s ease-in-out infinite;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .explosion {
+      font-size: 8rem;
+      animation: explode 1s ease-out infinite;
+    }
+    
+    @keyframes explode {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.8); opacity: 0.8; }
+    }
+    
+    .reset-btn {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      text-transform: uppercase;
+      background: var(--success-green);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .reset-btn:hover {
+      background: #2e7d32;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Project Overlord</h1>
+    <div class="tagline">
+      Business is Booming! Don't go <strong>fission</strong> for more! Avoid the con<strong>fusion</strong> of choice!
+    </div>
+    
+    <!-- Setup Screen -->
+    <div id="setup-screen" class="screen active">
+      <div class="setup-panel">
+        <h2>Provision Your Bomb</h2>
+        <p style="text-align: center; margin-bottom: 2rem; opacity: 0.8;">
+          Configure your <strong>Preferential Eigenstate-Selecting Temporally-Dispersive Internet Bomb</strong>
+        </p>
+        
+        <form id="setup-form">
+          <div class="form-group">
+            <label for="activation-code">Activation Code</label>
+            <span class="default">Default: 1234</span>
+            <input type="text" id="activation-code" maxlength="4" placeholder="1234">
+          </div>
+          
+          <div class="form-group">
+            <label for="deactivation-code">Deactivation Code</label>
+            <span class="default">Default: 0000</span>
+            <input type="text" id="deactivation-code" maxlength="4" placeholder="0000">
+          </div>
+          
+          <div class="form-group">
+            <label for="countdown-duration">Countdown Duration (seconds)</label>
+            <span class="default">Default: 30</span>
+            <input type="number" id="countdown-duration" min="1" placeholder="30">
+          </div>
+          
+          <button type="submit" class="btn btn-danger">Provision Bomb</button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Bomb Screen -->
+    <div id="bomb-screen" class="screen">
+      <div class="bomb-components">
+        <!-- Trigger Component -->
+        <div class="component">
+          <div id="bomb-status" class="status-indicator inactive">
+            Bomb is Inactive
+          </div>
+          
+          <div id="error-message" class="error-message"></div>
+          
+          <div class="code-display">
+            <input type="text" id="trigger-code" value="" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+          </div>
+          
+          <div class="keypad">
+            <button class="num-btn" data-value="7">7</button>
+            <button class="num-btn" data-value="8">8</button>
+            <button class="num-btn" data-value="9">9</button>
+            <button class="num-btn" data-value="4">4</button>
+            <button class="num-btn" data-value="5">5</button>
+            <button class="num-btn" data-value="6">6</button>
+            <button class="num-btn" data-value="1">1</button>
+            <button class="num-btn" data-value="2">2</button>
+            <button class="num-btn" data-value="3">3</button>
+            <button class="num-btn" data-value="0">0</button>
+            <button class="delete-btn" id="delete-btn">⌫</button>
+            <button class="action-btn" id="action-btn">Activate</button>
+          </div>
+        </div>
+        
+        <!-- Timer Component -->
+        <div class="component">
+          <div id="timer-display" class="timer-display">
+            <input type="text" id="timer-output" readonly value="00:00">
+          </div>
+        </div>
+        
+        <!-- Device Component -->
+        <div class="component device">
+          <svg class="bomb-image" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Bomb body -->
+            <ellipse cx="100" cy="120" rx="60" ry="70" fill="#333" stroke="#d32f2f" stroke-width="3"/>
+            <ellipse cx="100" cy="120" rx="50" ry="60" fill="#1a1a1a"/>
+            
+            <!-- Fuse -->
+            <path d="M 100 40 Q 80 30, 60 20" stroke="#d32f2f" stroke-width="4" fill="none"/>
+            <circle cx="55" cy="15" r="8" fill="#ff5252">
+              <animate attributeName="opacity" values="1;0.3;1" dur="0.5s" repeatCount="indefinite"/>
+            </circle>
+            
+            <!-- Display panel -->
+            <rect x="70" y="100" width="60" height="30" rx="5" fill="#0a0a0a" stroke="#d32f2f" stroke-width="2"/>
+            <text x="100" y="120" font-family="monospace" font-size="14" fill="#ff5252" text-anchor="middle">
+              <tspan id="bomb-svg-time">30</tspan>
+            </text>
+            
+            <!-- Rivets -->
+            <circle cx="70" cy="80" r="3" fill="#666"/>
+            <circle cx="130" cy="80" r="3" fill="#666"/>
+            <circle cx="70" cy="160" r="3" fill="#666"/>
+            <circle cx="130" cy="160" r="3" fill="#666"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Detonation Screen -->
+    <div id="detonation-screen" class="screen">
+      <div class="detonation-screen">
+        <h2>That went as well as could be expected...</h2>
+        <div class="explosion">💥</div>
+        <p style="font-size: 1.5rem; margin-top: 2rem;">BOOM! Explosion occurred.</p>
+        <button class="reset-btn" onclick="location.reload()">Reset Everything</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // Bomb Simulation Classes
+    // ============================================
+    
+    class Timer {
+      constructor(countdown = 30) {
+        this.timeRemaining = countdown;
+        this.started = false;
+        this.detonationTime = null;
+        this.intervalId = null;
+      }
+      
+      start() {
+        if (this.started) return;
+        this.detonationTime = Date.now() + (this.timeRemaining * 1000);
+        this.started = true;
+      }
+      
+      stop() {
+        if (!this.started) return;
+        this.timeRemaining = Math.max(0, Math.floor((this.detonationTime - Date.now()) / 1000));
+        this.started = false;
+        this.detonationTime = null;
+      }
+      
+      getTimeRemaining() {
+        if (!this.started) {
+          return this.timeRemaining;
+        }
+        return Math.max(0, Math.floor((this.detonationTime - Date.now()) / 1000));
+      }
+      
+      isDetonated() {
+        if (!this.started) return false;
+        return Date.now() >= this.detonationTime;
+      }
+      
+      reset(time = 30) {
+        this.timeRemaining = time;
+        this.started = false;
+        this.detonationTime = null;
+      }
+    }
+    
+    class Trigger {
+      constructor(activationCode = '1234', deactivationCode = '0000') {
+        this.activationCode = activationCode;
+        this.deactivationCode = deactivationCode;
+        this.active = false;
+        this.attempts = 0;
+      }
+      
+      activate(code) {
+        if (this.isValid(code) && code === this.activationCode) {
+          this.active = true;
+          return true;
+        }
+        return false;
+      }
+      
+      deactivate(code) {
+        if (this.isDetonated()) return false;
+        
+        this.attempts++;
+        
+        if (this.isValid(code) && code === this.deactivationCode) {
+          this.reset();
+          return true;
+        }
+        return false;
+      }
+      
+      isActivated() {
+        return this.active;
+      }
+      
+      isDetonated() {
+        return this.attempts > 2;
+      }
+      
+      isValid(code) {
+        return /^\d{4}$/.test(code);
+      }
+      
+      reset() {
+        this.active = false;
+        this.attempts = 0;
+      }
+    }
+    
+    class Bomb {
+      constructor(trigger, timer) {
+        this.trigger = trigger;
+        this.timer = timer;
+      }
+      
+      isDetonated() {
+        return this.trigger.isDetonated() || this.timer.isDetonated();
+      }
+    }
+    
+    // ============================================
+    // UI Controller
+    // ============================================
+    
+    class BombUI {
+      constructor() {
+        this.codeStack = [];
+        this.bomb = null;
+        this.timerIntervalId = null;
+        
+        this.initializeSetupScreen();
+      }
+      
+      initializeSetupScreen() {
+        const form = document.getElementById('setup-form');
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.provisionBomb();
+        });
+      }
+      
+      provisionBomb() {
+        const activationCode = document.getElementById('activation-code').value || '1234';
+        const deactivationCode = document.getElementById('deactivation-code').value || '0000';
+        const countdown = parseInt(document.getElementById('countdown-duration').value) || 30;
+        
+        // Validate inputs
+        if (!/^\d{4}$/.test(activationCode)) {
+          alert('Activation code must be 4 digits');
+          return;
+        }
+        if (!/^\d{4}$/.test(deactivationCode)) {
+          alert('Deactivation code must be 4 digits');
+          return;
+        }
+        if (countdown < 1) {
+          alert('Countdown must be at least 1 second');
+          return;
+        }
+        
+        // Create bomb
+        const trigger = new Trigger(activationCode, deactivationCode);
+        const timer = new Timer(countdown);
+        this.bomb = new Bomb(trigger, timer);
+        
+        // Show bomb screen
+        this.showScreen('bomb-screen');
+        this.initializeBombScreen();
+        this.updateDisplay();
+      }
+      
+      initializeBombScreen() {
+        // Number buttons
+        document.querySelectorAll('.num-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.addDigit(btn.dataset.value);
+          });
+        });
+        
+        // Delete button
+        document.getElementById('delete-btn').addEventListener('click', () => {
+          this.deleteDigit();
+        });
+        
+        // Action button (Activate/Deactivate)
+        document.getElementById('action-btn').addEventListener('click', () => {
+          this.toggleBombState();
+        });
+        
+        // Allow direct typing in the code field
+        const codeInput = document.getElementById('trigger-code');
+        codeInput.addEventListener('input', (e) => {
+          this.handleDirectInput(e);
+        });
+        
+        // Allow Enter key to trigger activation/deactivation
+        codeInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            this.toggleBombState();
+          }
+        });
+        
+        // Start timer update
+        this.timerIntervalId = setInterval(() => {
+          this.updateTimer();
+          this.checkDetonation();
+        }, 100);
+      }
+      
+      addDigit(digit) {
+        if (this.codeStack.length < 4) {
+          this.codeStack.push(digit);
+          this.updateCodeDisplay();
+        }
+      }
+      
+      deleteDigit() {
+        this.codeStack.pop();
+        this.updateCodeDisplay();
+      }
+      
+      handleDirectInput(e) {
+        // Only allow digits
+        const value = e.target.value.replace(/\D/g, '');
+        
+        // Limit to 4 digits
+        const limitedValue = value.slice(0, 4);
+        
+        // Update codeStack to match typed input
+        this.codeStack = limitedValue.split('');
+        
+        // Update the display (this will also update the input field)
+        this.updateCodeDisplay();
+      }
+      
+      updateCodeDisplay() {
+        document.getElementById('trigger-code').value = this.codeStack.join('');
+      }
+      
+      toggleBombState() {
+        const code = this.codeStack.join('');
+        this.clearError();
+        
+        if (!this.bomb.trigger.isValid(code)) {
+          this.showError('Code must be 4 digits');
+          return;
+        }
+        
+        if (!this.bomb.trigger.isActivated()) {
+          // Try to activate
+          if (this.bomb.trigger.activate(code)) {
+            this.bomb.timer.start();
+            this.updateDisplay();
+          } else {
+            this.showError('Incorrect activation code');
+          }
+          this.codeStack = [];
+          this.updateCodeDisplay();
+        } else {
+          // Try to deactivate
+          if (this.bomb.trigger.deactivate(code)) {
+            this.bomb.timer.stop();
+            this.updateDisplay();
+          } else {
+            this.showError(`Incorrect deactivation code (${3 - this.bomb.trigger.attempts} attempts remaining)`);
+          }
+          this.codeStack = [];
+          this.updateCodeDisplay();
+        }
+      }
+      
+      updateDisplay() {
+        const status = document.getElementById('bomb-status');
+        const actionBtn = document.getElementById('action-btn');
+        
+        if (this.bomb.trigger.isActivated()) {
+          status.textContent = 'Bomb is Active';
+          status.className = 'status-indicator active';
+          actionBtn.textContent = 'Deactivate';
+        } else {
+          status.textContent = 'Bomb is Inactive';
+          status.className = 'status-indicator inactive';
+          actionBtn.textContent = 'Activate';
+        }
+        
+        this.updateTimer();
+      }
+      
+      updateTimer() {
+        const time = this.bomb.timer.getTimeRemaining();
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        document.getElementById('timer-output').value = display;
+        document.getElementById('bomb-svg-time').textContent = time;
+        
+        // Add warning animation when time is low
+        const timerDisplay = document.getElementById('timer-display');
+        if (time <= 10 && this.bomb.timer.started) {
+          timerDisplay.classList.add('warning');
+        } else {
+          timerDisplay.classList.remove('warning');
+        }
+      }
+      
+      checkDetonation() {
+        if (this.bomb.isDetonated()) {
+          clearInterval(this.timerIntervalId);
+          this.showScreen('detonation-screen');
+        }
+      }
+      
+      showError(message) {
+        const errorEl = document.getElementById('error-message');
+        errorEl.textContent = message;
+      }
+      
+      clearError() {
+        document.getElementById('error-message').textContent = '';
+      }
+      
+      showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(screen => {
+          screen.classList.remove('active');
+        });
+        document.getElementById(screenId).classList.add('active');
+      }
+    }
+    
+    // ============================================
+    // Initialize Application
+    // ============================================
+    
+    const app = new BombUI();
+  </script>
+</body>
+</html>
