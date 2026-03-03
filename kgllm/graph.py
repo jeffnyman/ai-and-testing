@@ -21,7 +21,8 @@ def build_graph(extraction: dict) -> Graph:
 
 
 def _entity_uri(entity: dict) -> URIRef:
-  return KG[entity["id"]]
+  safe_id = entity["id"].replace(" ", "_").replace("-", "_").lower()
+  return KG[safe_id]
 
 
 def _add_entity(g: Graph, entity: dict) -> URIRef:
