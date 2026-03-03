@@ -93,8 +93,10 @@ ORDER BY DESC(?count)
   print("Entity types:")
 
   for row in g.query(type_query, initNs={"rdf": RDF}):
-    type_label = str(row.type).replace(KG_NAMESPACE, "kg:")
-    print(f"  {type_label}: {row.count}")
+    row_list = list(row)
+    type_label = str(row_list[0]).replace(KG_NAMESPACE, "kg:")
+    count_val = str(row_list[1])
+    print(f"  {type_label}: {count_val}")
 
   print("---------------------\n")
 
