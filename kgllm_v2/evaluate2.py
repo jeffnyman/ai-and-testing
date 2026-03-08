@@ -4,7 +4,6 @@ from deepeval.test_case import LLMTestCase
 from pathlib import Path
 from extraction import run_variants
 import json
-# from pathlib import Path
 
 
 def normalize(text: str) -> str:

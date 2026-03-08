@@ -4,9 +4,6 @@ from deepeval.test_case import LLMTestCase
 from pathlib import Path
 from extraction import run_variants
 
-# import json
-# from pathlib import Path
-
 
 def compare_variants(passage: str, verbose: bool = False) -> list:
   print("\n  Running all prompt variants...")
