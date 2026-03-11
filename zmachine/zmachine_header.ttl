@@ -4,9 +4,9 @@
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 @prefix zm:   <http://example.org/zmachine/> .
 
-# =============================================================================
+# ============================================================================
 # ONTOLOGY DECLARATION
-# =============================================================================
+# ============================================================================
 
 <http://example.org/zmachine/>
     a owl:Ontology ;
@@ -14,9 +14,9 @@
     rdfs:comment """Gold standard ontology for the Z-Machine header, derived from Section 11 (normative) and Appendix B (conventional) of the Z-Machine Standards Document v1.1. Models header fields, bitfields, flags registers, the header extension table, version applicability, and access authority semantics (Dyn/Int/Rst).""" .
 
 
-# =============================================================================
+# ============================================================================
 # CLASSES
-# =============================================================================
+# ============================================================================
 
 zm:HeaderField a owl:Class ;
     rdfs:label "Header Field" ;
@@ -37,9 +37,7 @@ zm:BitField a owl:Class ;
 
 zm:HeaderExtensionTable a owl:Class ;
     rdfs:label "Header Extension Table" ;
-    rdfs:comment """The self-describing structure pointed to by the field at
-        offset 0x36. Its first word contains the count of subsequent words.
-        Modeled as a distinct entity type because its access pattern (indirect, self-describing length) differs fundamentally from fixed-offset header fields.""" .
+    rdfs:comment """The self-describing structure pointed to by the field at offset 0x36. Its first word contains the count of subsequent words.Modeled as a distinct entity type because its access pattern (indirect, self-describing length) differs fundamentally from fixed-offset header fields.""" .
 
 zm:ExtensionField a owl:Class ;
     rdfs:label "Extension Field" ;
@@ -67,9 +65,9 @@ zm:SourceAuthority a owl:Class ;
         in Infocom and Inform games.""" .
 
 
-# =============================================================================
+# ============================================================================
 # NAMED INDIVIDUALS: ZMachineVersion
-# =============================================================================
+# ============================================================================
 
 zm:v1 a zm:ZMachineVersion ;
     rdfs:label "Version 1" ;
@@ -96,9 +94,9 @@ zm:v6 a zm:ZMachineVersion ;
     zm:versionNumber 6 .
 
 
-# =============================================================================
+# ============================================================================
 # NAMED INDIVIDUALS: AccessAuthority
-# =============================================================================
+# ============================================================================
 
 zm:game a zm:AccessAuthority ;
     rdfs:label "Game" ;
@@ -113,9 +111,9 @@ zm:either a zm:AccessAuthority ;
     rdfs:comment "Both game and interpreter may mutate this field." .
 
 
-# =============================================================================
+# ============================================================================
 # NAMED INDIVIDUALS: FieldType
-# =============================================================================
+# ============================================================================
 
 zm:byteValue a zm:FieldType ;
     rdfs:label "Byte Value" ;
@@ -138,9 +136,9 @@ zm:bitContainer a zm:FieldType ;
     rdfs:comment "A byte or word whose value is interpreted as a collection of flags." .
 
 
-# =============================================================================
+# ============================================================================
 # NAMED INDIVIDUALS: SourceAuthority
-# =============================================================================
+# ============================================================================
 
 zm:normative a zm:SourceAuthority ;
     rdfs:label "Normative" ;
@@ -151,9 +149,9 @@ zm:conventional a zm:SourceAuthority ;
     rdfs:comment """Defined in Appendix B. Reflects observed usage in Infocom and Inform games but is not required by the formal spec.""" .
 
 
-# =============================================================================
+# ============================================================================
 # DATATYPE PROPERTIES
-# =============================================================================
+# ============================================================================
 
 zm:offset a owl:DatatypeProperty ;
     rdfs:label "offset" ;
@@ -196,9 +194,9 @@ zm:description a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 
-# =============================================================================
+# ============================================================================
 # OBJECT PROPERTIES
-# =============================================================================
+# ============================================================================
 
 zm:hasFieldType a owl:ObjectProperty ;
     rdfs:label "has field type" ;
@@ -222,8 +220,7 @@ zm:applicableUntil a owl:ObjectProperty ;
 
 zm:mutatedBy a owl:ObjectProperty ;
     rdfs:label "mutated by" ;
-    rdfs:comment """The access authority permitted to change this field during
-        execution. Absence means the field is read-only for both game and interpreter.""" ;
+    rdfs:comment """The access authority permitted to change this field during execution. Absence means the field is read-only for both game and interpreter.""" ;
     rdfs:range zm:AccessAuthority .
 
 zm:containsBit a owl:ObjectProperty ;
@@ -251,9 +248,9 @@ zm:withinRegister a owl:ObjectProperty ;
     rdfs:range zm:FlagsRegister .
 
 
-# =============================================================================
+# ============================================================================
 # MAIN HEADER FIELDS
-# =============================================================================
+# ============================================================================
 
 # --- 0x00: Version Number ---
 
@@ -322,7 +319,7 @@ zm:flags1_v13_bit3_tandy a zm:BitField ;
     zm:hasSourceAuthority zm:conventional ;
     zm:description """The legendary Tandy bit. When set, some Infocom games
         (notably Zork I and The Witness) suppress or soften content deemed
-        offensive by the Tandy Corporation, which sold early Infocom titles.""" .
+        offensive by the Tandy Corporation, which sold early Infocom titles """ .
 
 zm:flags1_v13_bit4 a zm:BitField ;
     rdfs:label "Flags 1 bit 4: Status line not available (V1-3)" ;
@@ -990,9 +987,9 @@ zm:field_inform_version a zm:HeaderField ;
         Infocom or earlier Inform files.""" .
 
 
-# =============================================================================
+# ============================================================================
 # HEADER EXTENSION TABLE
-# =============================================================================
+# ============================================================================
 
 zm:headerExtensionTable a zm:HeaderExtensionTable ;
     rdfs:label "Header Extension Table" ;
