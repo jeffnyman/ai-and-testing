@@ -1,0 +1,1101 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix zm:   <http://example.org/zmachine/> .
+
+# =============================================================================
+# ONTOLOGY DECLARATION
+# =============================================================================
+
+<http://example.org/zmachine/>
+    a owl:Ontology ;
+    rdfs:label "Z-Machine Header Ontology" ;
+    rdfs:comment """Gold standard ontology for the Z-Machine header, derived from
+        Section 11 (normative) and Appendix B (conventional) of the Z-Machine
+        Standards Document v1.1. Models header fields, bitfields, flags registers,
+        the header extension table, version applicability, and access authority
+        semantics (Dyn/Int/Rst).""" .
+
+
+# =============================================================================
+# CLASSES
+# =============================================================================
+
+zm:HeaderField a owl:Class ;
+    rdfs:label "Header Field" ;
+    rdfs:comment """A field at a fixed byte offset within the Z-Machine header.
+        Carries an offset, size, type, version applicability, and access
+        authority constraints.""" .
+
+zm:FlagsRegister a owl:Class ;
+    rdfs:subClassOf zm:HeaderField ;
+    rdfs:label "Flags Register" ;
+    rdfs:comment """A header field whose value is a bitfield container rather
+        than a simple scalar. Access semantics operate at the individual bit
+        level via BitField individuals.""" .
+
+zm:BitField a owl:Class ;
+    rdfs:label "Bit Field" ;
+    rdfs:comment """An individual bit within a FlagsRegister. Has its own
+        version applicability and access authority, which may differ from
+        the parent register.""" .
+
+zm:HeaderExtensionTable a owl:Class ;
+    rdfs:label "Header Extension Table" ;
+    rdfs:comment """The self-describing structure pointed to by the field at
+        offset 0x36. Its first word contains the count of subsequent words.
+        Modeled as a distinct entity type because its access pattern (indirect,
+        self-describing length) differs fundamentally from fixed-offset header
+        fields.""" .
+
+zm:ExtensionField a owl:Class ;
+    rdfs:label "Extension Field" ;
+    rdfs:comment """A field within the HeaderExtensionTable, addressed by word
+        index rather than byte offset. Parallel to HeaderField but accessed
+        indirectly via the extension table pointer.""" .
+
+zm:ZMachineVersion a owl:Class ;
+    rdfs:label "Z-Machine Version" ;
+    rdfs:comment "A named version of the Z-Machine specification, 1 through 6." .
+
+zm:AccessAuthority a owl:Class ;
+    rdfs:label "Access Authority" ;
+    rdfs:comment """The agent permitted to mutate a field or bit during execution.
+        Corresponds to the Dyn (game) and Int (interpreter) columns in the
+        spec header table.""" .
+
+zm:FieldType a owl:Class ;
+    rdfs:label "Field Type" ;
+    rdfs:comment "The data type of a header field's value." .
+
+zm:SourceAuthority a owl:Class ;
+    rdfs:label "Source Authority" ;
+    rdfs:comment """Whether a field is defined normatively (Section 11) or
+        conventionally (Appendix B). Normative fields must be handled by a
+        conforming interpreter. Conventional fields reflect observed practice
+        in Infocom and Inform games.""" .
+
+
+# =============================================================================
+# NAMED INDIVIDUALS: ZMachineVersion
+# =============================================================================
+
+zm:v1 a zm:ZMachineVersion ;
+    rdfs:label "Version 1" ;
+    zm:versionNumber 1 .
+
+zm:v2 a zm:ZMachineVersion ;
+    rdfs:label "Version 2" ;
+    zm:versionNumber 2 .
+
+zm:v3 a zm:ZMachineVersion ;
+    rdfs:label "Version 3" ;
+    zm:versionNumber 3 .
+
+zm:v4 a zm:ZMachineVersion ;
+    rdfs:label "Version 4" ;
+    zm:versionNumber 4 .
+
+zm:v5 a zm:ZMachineVersion ;
+    rdfs:label "Version 5" ;
+    zm:versionNumber 5 .
+
+zm:v6 a zm:ZMachineVersion ;
+    rdfs:label "Version 6" ;
+    zm:versionNumber 6 .
+
+
+# =============================================================================
+# NAMED INDIVIDUALS: AccessAuthority
+# =============================================================================
+
+zm:game a zm:AccessAuthority ;
+    rdfs:label "Game" ;
+    rdfs:comment "The running game (story file) may mutate this field. Corresponds to the Dyn column." .
+
+zm:interpreter a zm:AccessAuthority ;
+    rdfs:label "Interpreter" ;
+    rdfs:comment "The interpreter may mutate this field. Corresponds to the Int column." .
+
+zm:either a zm:AccessAuthority ;
+    rdfs:label "Either" ;
+    rdfs:comment "Both game and interpreter may mutate this field." .
+
+
+# =============================================================================
+# NAMED INDIVIDUALS: FieldType
+# =============================================================================
+
+zm:byteValue a zm:FieldType ;
+    rdfs:label "Byte Value" ;
+    rdfs:comment "A single unsigned byte interpreted as a scalar value." .
+
+zm:wordValue a zm:FieldType ;
+    rdfs:label "Word Value" ;
+    rdfs:comment "A two-byte big-endian unsigned integer interpreted as a scalar value." .
+
+zm:byteAddress a zm:FieldType ;
+    rdfs:label "Byte Address" ;
+    rdfs:comment "A two-byte value representing a direct byte address in the story file." .
+
+zm:packedAddress a zm:FieldType ;
+    rdfs:label "Packed Address" ;
+    rdfs:comment """A two-byte value representing a packed address. The actual byte
+        address is derived by multiplying by a version-dependent constant.""" .
+
+zm:bitContainer a zm:FieldType ;
+    rdfs:label "Bit Container" ;
+    rdfs:comment "A byte or word whose value is interpreted as a collection of flags." .
+
+
+# =============================================================================
+# NAMED INDIVIDUALS: SourceAuthority
+# =============================================================================
+
+zm:normative a zm:SourceAuthority ;
+    rdfs:label "Normative" ;
+    rdfs:comment "Defined in Section 11. A conforming interpreter must handle this field." .
+
+zm:conventional a zm:SourceAuthority ;
+    rdfs:label "Conventional" ;
+    rdfs:comment """Defined in Appendix B. Reflects observed usage in Infocom and
+        Inform games but is not required by the formal spec.""" .
+
+
+# =============================================================================
+# DATATYPE PROPERTIES
+# =============================================================================
+
+zm:offset a owl:DatatypeProperty ;
+    rdfs:label "offset" ;
+    rdfs:comment "Byte offset of the field within the header, as an integer." ;
+    rdfs:domain zm:HeaderField ;
+    rdfs:range xsd:integer .
+
+zm:byteSize a owl:DatatypeProperty ;
+    rdfs:label "byte size" ;
+    rdfs:comment "Size of the field in bytes." ;
+    rdfs:domain zm:HeaderField ;
+    rdfs:range xsd:integer .
+
+zm:bitPosition a owl:DatatypeProperty ;
+    rdfs:label "bit position" ;
+    rdfs:comment "Zero-indexed position of the bit within its parent FlagsRegister." ;
+    rdfs:domain zm:BitField ;
+    rdfs:range xsd:integer .
+
+zm:wordIndex a owl:DatatypeProperty ;
+    rdfs:label "word index" ;
+    rdfs:comment "Zero-indexed word position within the HeaderExtensionTable." ;
+    rdfs:domain zm:ExtensionField ;
+    rdfs:range xsd:integer .
+
+zm:versionNumber a owl:DatatypeProperty ;
+    rdfs:label "version number" ;
+    rdfs:comment "The integer version number (1-6) of a ZMachineVersion individual." ;
+    rdfs:domain zm:ZMachineVersion ;
+    rdfs:range xsd:integer .
+
+zm:mustResetOnRestore a owl:DatatypeProperty ;
+    rdfs:label "must reset on restore" ;
+    rdfs:comment """If true, the interpreter must set this field correctly after
+        loading, after a restore, and after a restart. Corresponds to the Rst
+        column in the spec.""" ;
+    rdfs:range xsd:boolean .
+
+zm:description a owl:DatatypeProperty ;
+    rdfs:label "description" ;
+    rdfs:comment "Human-readable description of the field's purpose, drawn from the spec." ;
+    rdfs:range xsd:string .
+
+
+# =============================================================================
+# OBJECT PROPERTIES
+# =============================================================================
+
+zm:hasFieldType a owl:ObjectProperty ;
+    rdfs:label "has field type" ;
+    rdfs:domain zm:HeaderField ;
+    rdfs:range zm:FieldType .
+
+zm:hasSourceAuthority a owl:ObjectProperty ;
+    rdfs:label "has source authority" ;
+    rdfs:comment "Whether this field is normatively or conventionally defined." ;
+    rdfs:range zm:SourceAuthority .
+
+zm:applicableFrom a owl:ObjectProperty ;
+    rdfs:label "applicable from" ;
+    rdfs:comment "The earliest Z-Machine version in which this field or bit is defined." ;
+    rdfs:range zm:ZMachineVersion .
+
+zm:applicableUntil a owl:ObjectProperty ;
+    rdfs:label "applicable until" ;
+    rdfs:comment """The last Z-Machine version in which this field or bit retains
+        its stated meaning. Absence implies the field remains valid through Version 6.""" ;
+    rdfs:range zm:ZMachineVersion .
+
+zm:mutatedBy a owl:ObjectProperty ;
+    rdfs:label "mutated by" ;
+    rdfs:comment """The access authority permitted to change this field during
+        execution. Absence means the field is read-only for both game and interpreter.""" ;
+    rdfs:range zm:AccessAuthority .
+
+zm:containsBit a owl:ObjectProperty ;
+    rdfs:label "contains bit" ;
+    rdfs:comment "Relates a FlagsRegister to each of its constituent BitField individuals." ;
+    rdfs:domain zm:FlagsRegister ;
+    rdfs:range zm:BitField .
+
+zm:pointerTo a owl:ObjectProperty ;
+    rdfs:label "pointer to" ;
+    rdfs:comment """Indicates that this field's value is a byte address pointing to
+        another structure rather than a scalar value. Typed to distinguish pointer
+        fields from value fields at the ontology level.""" .
+
+zm:supersededBy a owl:ObjectProperty ;
+    rdfs:label "superseded by" ;
+    rdfs:comment """Relates a HeaderField to the HeaderField that replaces its
+        meaning at the same offset from a given version onward. Used to model
+        the Version 5/6 font field swap at offsets 0x26 and 0x27.""" ;
+    rdfs:domain zm:HeaderField ;
+    rdfs:range zm:HeaderField .
+
+zm:withinRegister a owl:ObjectProperty ;
+    rdfs:label "within register" ;
+    rdfs:comment "Relates a BitField back to its parent FlagsRegister." ;
+    rdfs:domain zm:BitField ;
+    rdfs:range zm:FlagsRegister .
+
+
+# =============================================================================
+# MAIN HEADER FIELDS
+# =============================================================================
+
+# --- 0x00: Version Number ---
+
+zm:field_version a zm:HeaderField ;
+    rdfs:label "Version Number" ;
+    zm:offset 0 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Z-Machine version number (1 to 6). Must be read before interpreting any other header field." .
+
+
+# --- 0x01: Flags 1 ---
+
+zm:field_flags1 a zm:FlagsRegister ;
+    rdfs:label "Flags 1" ;
+    zm:offset 1 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:bitContainer ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Flags register at offset 1. Bit meanings differ between Versions 1-3 and Versions 4+." ;
+    zm:containsBit
+        zm:flags1_v13_bit1,
+        zm:flags1_v13_bit2,
+        zm:flags1_v13_bit3_tandy,
+        zm:flags1_v13_bit4,
+        zm:flags1_v13_bit5,
+        zm:flags1_v13_bit6,
+        zm:flags1_v5plus_bit0,
+        zm:flags1_v6plus_bit1,
+        zm:flags1_v4plus_bit2,
+        zm:flags1_v4plus_bit3,
+        zm:flags1_v4plus_bit4,
+        zm:flags1_v6plus_bit5,
+        zm:flags1_v4plus_bit7 .
+
+# Flags 1, Versions 1-3
+
+zm:flags1_v13_bit1 a zm:BitField ;
+    rdfs:label "Flags 1 bit 1: Status line type (V1-3)" ;
+    zm:bitPosition 1 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v1 ;
+    zm:applicableUntil zm:v3 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Status line type: 0 = score/turns, 1 = hours:minutes." .
+
+zm:flags1_v13_bit2 a zm:BitField ;
+    rdfs:label "Flags 1 bit 2: Story file split (V1-3)" ;
+    zm:bitPosition 2 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v1 ;
+    zm:applicableUntil zm:v3 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Story file split across two discs." .
+
+zm:flags1_v13_bit3_tandy a zm:BitField ;
+    rdfs:label "Flags 1 bit 3: Tandy bit (V3)" ;
+    zm:bitPosition 3 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v3 ;
+    zm:applicableUntil zm:v3 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:hasSourceAuthority zm:conventional ;
+    zm:description """The legendary Tandy bit. When set, some Infocom games
+        (notably Zork I and The Witness) suppress or soften content deemed
+        offensive by the Tandy Corporation, which sold early Infocom titles.""" .
+
+zm:flags1_v13_bit4 a zm:BitField ;
+    rdfs:label "Flags 1 bit 4: Status line not available (V1-3)" ;
+    zm:bitPosition 4 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v1 ;
+    zm:applicableUntil zm:v3 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Status line not available." .
+
+zm:flags1_v13_bit5 a zm:BitField ;
+    rdfs:label "Flags 1 bit 5: Screen-splitting available (V1-3)" ;
+    zm:bitPosition 5 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v1 ;
+    zm:applicableUntil zm:v3 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Screen-splitting available." .
+
+zm:flags1_v13_bit6 a zm:BitField ;
+    rdfs:label "Flags 1 bit 6: Variable-pitch font default (V1-3)" ;
+    zm:bitPosition 6 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v1 ;
+    zm:applicableUntil zm:v3 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Variable-pitch font is the default." .
+
+# Flags 1, Version 4+
+
+zm:flags1_v5plus_bit0 a zm:BitField ;
+    rdfs:label "Flags 1 bit 0: Colours available (V5+)" ;
+    zm:bitPosition 0 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description """Colours available. This bit did not exist in the Version 1-3
+        register layout and is first defined from Version 5 onward, where the
+        interpreter sets it to indicate colour support.""" .
+
+zm:flags1_v6plus_bit1 a zm:BitField ;
+    rdfs:label "Flags 1 bit 1: Picture displaying available (V6)" ;
+    zm:bitPosition 1 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Picture displaying available." .
+
+zm:flags1_v4plus_bit2 a zm:BitField ;
+    rdfs:label "Flags 1 bit 2: Boldface available (V4+)" ;
+    zm:bitPosition 2 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Boldface available." .
+
+zm:flags1_v4plus_bit3 a zm:BitField ;
+    rdfs:label "Flags 1 bit 3: Italic available (V4+)" ;
+    zm:bitPosition 3 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Italic available." .
+
+zm:flags1_v4plus_bit4 a zm:BitField ;
+    rdfs:label "Flags 1 bit 4: Fixed-space style available (V4+)" ;
+    zm:bitPosition 4 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Fixed-space style available." .
+
+zm:flags1_v6plus_bit5 a zm:BitField ;
+    rdfs:label "Flags 1 bit 5: Sound effects available (V6)" ;
+    zm:bitPosition 5 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Sound effects available." .
+
+zm:flags1_v4plus_bit7 a zm:BitField ;
+    rdfs:label "Flags 1 bit 7: Timed keyboard input available (V4+)" ;
+    zm:bitPosition 7 ;
+    zm:withinRegister zm:field_flags1 ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Timed keyboard input available. Added in Standard 1.0." .
+
+
+# --- 0x02: Release Number (conventional) ---
+
+zm:field_release_number a zm:HeaderField ;
+    rdfs:label "Release Number" ;
+    zm:offset 2 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:conventional ;
+    zm:description """Release number of the story file. Written by Infocom and
+        Inform compilers. Not defined in Section 11 but universally present
+        in practice.""" .
+
+
+# --- 0x04: High Memory Base ---
+
+zm:field_high_memory_base a zm:HeaderField ;
+    rdfs:label "High Memory Base" ;
+    zm:offset 4 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Base address of high memory." .
+
+
+# --- 0x06: Initial Program Counter / Main Routine ---
+
+zm:field_initial_pc_v1to5 a zm:HeaderField ;
+    rdfs:label "Initial Program Counter (V1-5)" ;
+    zm:offset 6 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v1 ;
+    zm:applicableUntil zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:supersededBy zm:field_initial_pc_v6 ;
+    zm:description "Initial value of the program counter as a byte address." .
+
+zm:field_initial_pc_v6 a zm:HeaderField ;
+    rdfs:label "Initial PC: Packed address of main routine (V6)" ;
+    zm:offset 6 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:packedAddress ;
+    zm:applicableFrom zm:v6 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Packed address of the initial 'main' routine. Replaces the direct byte address used in Versions 1-5." .
+
+
+# --- 0x08: Dictionary Location ---
+
+zm:field_dictionary a zm:HeaderField ;
+    rdfs:label "Dictionary Location" ;
+    zm:offset 8 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Byte address of the dictionary." .
+
+
+# --- 0x0A: Object Table Location ---
+
+zm:field_object_table a zm:HeaderField ;
+    rdfs:label "Object Table Location" ;
+    zm:offset 10 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Byte address of the object table." .
+
+
+# --- 0x0C: Global Variables Table ---
+
+zm:field_global_variables a zm:HeaderField ;
+    rdfs:label "Global Variables Table Location" ;
+    zm:offset 12 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Byte address of the global variables table." .
+
+
+# --- 0x0E: Static Memory Base ---
+
+zm:field_static_memory_base a zm:HeaderField ;
+    rdfs:label "Static Memory Base" ;
+    zm:offset 14 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Base address of static memory." .
+
+
+# --- 0x10: Flags 2 ---
+
+zm:field_flags2 a zm:FlagsRegister ;
+    rdfs:label "Flags 2" ;
+    zm:offset 16 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:bitContainer ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Two-byte flags register. Bits carry mixed game/interpreter access authority." ;
+    zm:containsBit
+        zm:flags2_bit0,
+        zm:flags2_bit1,
+        zm:flags2_bit2,
+        zm:flags2_bit3,
+        zm:flags2_bit4,
+        zm:flags2_bit5,
+        zm:flags2_bit6,
+        zm:flags2_bit7,
+        zm:flags2_bit8,
+        zm:flags2_bit10_conventional .
+
+zm:flags2_bit0 a zm:BitField ;
+    rdfs:label "Flags 2 bit 0: Transcripting on (V1+)" ;
+    zm:bitPosition 0 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v1 ;
+    zm:mutatedBy zm:either ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description """Transcripting on. Game and interpreter may both set this bit.
+        Interpreter must also alter it when stream 2 is toggled, and must
+        ensure its value survives restart and restore.""" .
+
+zm:flags2_bit1 a zm:BitField ;
+    rdfs:label "Flags 2 bit 1: Force fixed-pitch (V3+)" ;
+    zm:bitPosition 1 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v3 ;
+    zm:mutatedBy zm:game ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game sets to force printing in fixed-pitch font." .
+
+zm:flags2_bit2 a zm:BitField ;
+    rdfs:label "Flags 2 bit 2: Screen redraw request (V6)" ;
+    zm:bitPosition 2 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:either ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Interpreter sets to request screen redraw; game clears when it complies." .
+
+zm:flags2_bit3 a zm:BitField ;
+    rdfs:label "Flags 2 bit 3: Game wants pictures (V5+)" ;
+    zm:bitPosition 3 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game wants to use pictures. Interpreter clears if it cannot provide." .
+
+zm:flags2_bit4 a zm:BitField ;
+    rdfs:label "Flags 2 bit 4: Game wants UNDO (V5+)" ;
+    zm:bitPosition 4 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game wants to use UNDO opcodes. Interpreter clears if it cannot provide." .
+
+zm:flags2_bit5 a zm:BitField ;
+    rdfs:label "Flags 2 bit 5: Game wants mouse (V5+)" ;
+    zm:bitPosition 5 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game wants to use a mouse. Interpreter clears if it cannot provide." .
+
+zm:flags2_bit6 a zm:BitField ;
+    rdfs:label "Flags 2 bit 6: Game wants colours (V5+)" ;
+    zm:bitPosition 6 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game wants to use colours. No Int column — interpreter does not clear this." .
+
+zm:flags2_bit7 a zm:BitField ;
+    rdfs:label "Flags 2 bit 7: Game wants sound effects (V5+)" ;
+    zm:bitPosition 7 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game wants to use sound effects. Interpreter clears if it cannot provide." .
+
+zm:flags2_bit8 a zm:BitField ;
+    rdfs:label "Flags 2 bit 8: Game wants menus (V6)" ;
+    zm:bitPosition 8 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game wants to use menus. Interpreter clears if it cannot provide." .
+
+zm:flags2_bit10_conventional a zm:BitField ;
+    rdfs:label "Flags 2 bit 10: Printer error (conventional)" ;
+    zm:bitPosition 10 ;
+    zm:withinRegister zm:field_flags2 ;
+    zm:applicableFrom zm:v3 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:hasSourceAuthority zm:conventional ;
+    zm:description """Possibly set by interpreter to indicate an error with the
+        printer during transcription. Observed in practice; not normatively defined.""" .
+
+
+# --- 0x12: Serial Code / Serial Number ---
+
+zm:field_serial_v2 a zm:HeaderField ;
+    rdfs:label "Serial Code (V2)" ;
+    zm:offset 18 ;
+    zm:byteSize 6 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v2 ;
+    zm:applicableUntil zm:v2 ;
+    zm:hasSourceAuthority zm:conventional ;
+    zm:supersededBy zm:field_serial_v3plus ;
+    zm:description "Six ASCII characters used as a serial code in Version 2 games." .
+
+zm:field_serial_v3plus a zm:HeaderField ;
+    rdfs:label "Serial Number (V3+)" ;
+    zm:offset 18 ;
+    zm:byteSize 6 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v3 ;
+    zm:hasSourceAuthority zm:conventional ;
+    zm:description "Six ASCII characters encoding the compilation date as YYMMDD." .
+
+
+# --- 0x18: Abbreviations Table ---
+
+zm:field_abbreviations a zm:HeaderField ;
+    rdfs:label "Abbreviations Table Location" ;
+    zm:offset 24 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v2 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Byte address of the abbreviations table." .
+
+
+# --- 0x1A: File Length ---
+
+zm:field_file_length a zm:HeaderField ;
+    rdfs:label "File Length" ;
+    zm:offset 26 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v3 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description """Stored length of the file, divided by a version-dependent constant:
+        2 for Versions 1-3, 4 for Versions 4-5, 8 for Version 6 and later.
+        Some early Version 3 files do not contain this value.""" .
+
+
+# --- 0x1C: Checksum ---
+
+zm:field_checksum a zm:HeaderField ;
+    rdfs:label "File Checksum" ;
+    zm:offset 28 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v3 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Checksum of the file. Some early Version 3 files do not contain this value." .
+
+
+# --- 0x1E: Interpreter Number ---
+
+zm:field_interpreter_number a zm:HeaderField ;
+    rdfs:label "Interpreter Number" ;
+    zm:offset 30 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description """Interpreter number. Infocom assigned numbers 1-11 to specific
+        platforms. Interpreter should choose the most suitable number for its
+        host machine. Modern games are strongly discouraged from branching on
+        this value.""" .
+
+
+# --- 0x1F: Interpreter Version ---
+
+zm:field_interpreter_version a zm:HeaderField ;
+    rdfs:label "Interpreter Version" ;
+    zm:offset 31 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description """Interpreter version. Conventionally an ASCII code for an
+        uppercase letter in Versions 4 and 5; Version 6 interpreters store
+        numbers here instead.""" .
+
+
+# --- 0x20: Screen Height ---
+
+zm:field_screen_height a zm:HeaderField ;
+    rdfs:label "Screen Height" ;
+    zm:offset 32 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Screen height in lines. The value 255 means infinite." .
+
+
+# --- 0x21: Screen Width (characters) ---
+
+zm:field_screen_width_chars a zm:HeaderField ;
+    rdfs:label "Screen Width (characters)" ;
+    zm:offset 33 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v4 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Screen width in characters." .
+
+
+# --- 0x22: Screen Width (units) ---
+
+zm:field_screen_width_units a zm:HeaderField ;
+    rdfs:label "Screen Width (units)" ;
+    zm:offset 34 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Screen width in units." .
+
+
+# --- 0x24: Screen Height (units) ---
+
+zm:field_screen_height_units a zm:HeaderField ;
+    rdfs:label "Screen Height (units)" ;
+    zm:offset 36 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Screen height in units." .
+
+
+# --- 0x26/0x27: Font dimensions (version-conditional swap) ---
+#
+# This is the most structurally complex part of the header.
+# In Version 5: offset 0x26 = font WIDTH, offset 0x27 = font HEIGHT.
+# In Version 6: offset 0x26 = font HEIGHT, offset 0x27 = font WIDTH.
+# The meanings at each offset invert across the version boundary.
+# Modeled as four distinct individuals with supersededBy linking each pair.
+
+zm:field_font_width_v5 a zm:HeaderField ;
+    rdfs:label "Font Width in units (V5, offset 0x26)" ;
+    zm:offset 38 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v5 ;
+    zm:applicableUntil zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:supersededBy zm:field_font_height_v6_at26 ;
+    zm:description "Font width in units (defined as width of '0'). At offset 0x26 in Version 5 only." .
+
+zm:field_font_height_v6_at26 a zm:HeaderField ;
+    rdfs:label "Font Height in units (V6, offset 0x26)" ;
+    zm:offset 38 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Font height in units. At offset 0x26 in Version 6 — swapped from the Version 5 meaning." .
+
+zm:field_font_height_v5 a zm:HeaderField ;
+    rdfs:label "Font Height in units (V5, offset 0x27)" ;
+    zm:offset 39 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v5 ;
+    zm:applicableUntil zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:supersededBy zm:field_font_width_v6_at27 ;
+    zm:description "Font height in units. At offset 0x27 in Version 5 only." .
+
+zm:field_font_width_v6_at27 a zm:HeaderField ;
+    rdfs:label "Font Width in units (V6, offset 0x27)" ;
+    zm:offset 39 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Font width in units (defined as width of '0'). At offset 0x27 in Version 6 — swapped from the Version 5 meaning." .
+
+
+# --- 0x28: Routines Offset ---
+
+zm:field_routines_offset a zm:HeaderField ;
+    rdfs:label "Routines Offset" ;
+    zm:offset 40 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v6 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Routines offset divided by 8. Used in computing packed addresses for Version 6." .
+
+
+# --- 0x2A: Static Strings Offset ---
+
+zm:field_static_strings_offset a zm:HeaderField ;
+    rdfs:label "Static Strings Offset" ;
+    zm:offset 42 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v6 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Static strings offset divided by 8. Used in computing packed addresses for Version 6." .
+
+
+# --- 0x2C: Default Background Colour ---
+
+zm:field_default_background a zm:HeaderField ;
+    rdfs:label "Default Background Colour" ;
+    zm:offset 44 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Default background colour." .
+
+
+# --- 0x2D: Default Foreground Colour ---
+
+zm:field_default_foreground a zm:HeaderField ;
+    rdfs:label "Default Foreground Colour" ;
+    zm:offset 45 ;
+    zm:byteSize 1 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Default foreground colour." .
+
+
+# --- 0x2E: Terminating Characters Table ---
+
+zm:field_terminating_chars a zm:HeaderField ;
+    rdfs:label "Terminating Characters Table Address" ;
+    zm:offset 46 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Byte address of the terminating characters table." .
+
+
+# --- 0x30: Output Stream 3 Width ---
+
+zm:field_stream3_width a zm:HeaderField ;
+    rdfs:label "Total Width of Output Stream 3 Text" ;
+    zm:offset 48 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Total width in pixels of text sent to output stream 3." .
+
+
+# --- 0x32: Standard Revision Number ---
+
+zm:field_standard_revision a zm:HeaderField ;
+    rdfs:label "Standard Revision Number" ;
+    zm:offset 50 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:wordValue ;
+    zm:applicableFrom zm:v1 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description """Two bytes: byte 0x32 = major revision, byte 0x33 = minor revision.
+        A conforming interpreter writes n and m here if it obeys revision n.m
+        of the standard. A non-standard interpreter leaves these as 0.""" .
+
+
+# --- 0x34: Alphabet Table Address ---
+
+zm:field_alphabet_table a zm:HeaderField ;
+    rdfs:label "Alphabet Table Address" ;
+    zm:offset 52 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Byte address of the alphabet table, or 0 to use the default alphabet." .
+
+
+# --- 0x36: Header Extension Table Address ---
+
+zm:field_header_extension_ptr a zm:HeaderField ;
+    rdfs:label "Header Extension Table Address" ;
+    zm:offset 54 ;
+    zm:byteSize 2 ;
+    zm:hasFieldType zm:byteAddress ;
+    zm:applicableFrom zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:pointerTo zm:headerExtensionTable ;
+    zm:description """Byte address of the header extension table. If 0 or absent,
+        no extension table exists and reads beyond the main header return 0.""" .
+
+
+# --- 0x38: Player Username (conventional, V6) ---
+
+zm:field_player_username a zm:HeaderField ;
+    rdfs:label "Player Username" ;
+    zm:offset 56 ;
+    zm:byteSize 8 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:hasSourceAuthority zm:conventional ;
+    zm:description """Eight bytes of ASCII used by Infocom to store the player's
+        username on their mainframe, useful for identifying saved games.
+        All zero in shipped story files.""" .
+
+
+# --- 0x3C: Inform Version (conventional) ---
+
+zm:field_inform_version a zm:HeaderField ;
+    rdfs:label "Inform Compiler Version" ;
+    zm:offset 60 ;
+    zm:byteSize 4 ;
+    zm:hasFieldType zm:byteValue ;
+    zm:applicableFrom zm:v1 ;
+    zm:hasSourceAuthority zm:conventional ;
+    zm:description """Four bytes of ASCII storing the version of Inform used to
+        compile the file, e.g. '6.11'. Written by Inform 6; not present in
+        Infocom or earlier Inform files.""" .
+
+
+# =============================================================================
+# HEADER EXTENSION TABLE
+# =============================================================================
+
+zm:headerExtensionTable a zm:HeaderExtensionTable ;
+    rdfs:label "Header Extension Table" ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description """Self-describing table providing additional header words beyond
+        the main 64-byte header. Word 0 contains the count of subsequent words.
+        Reads beyond the table length return 0; writes beyond it are silently
+        ignored.""" .
+
+zm:ext_word0 a zm:ExtensionField ;
+    rdfs:label "Extension Word 0: Table Length" ;
+    zm:wordIndex 0 ;
+    zm:applicableFrom zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Number of further words in the extension table." .
+
+zm:ext_word1 a zm:ExtensionField ;
+    rdfs:label "Extension Word 1: Mouse X Coordinate" ;
+    zm:wordIndex 1 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "X-coordinate of mouse after a click." .
+
+zm:ext_word2 a zm:ExtensionField ;
+    rdfs:label "Extension Word 2: Mouse Y Coordinate" ;
+    zm:wordIndex 2 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Y-coordinate of mouse after a click." .
+
+zm:ext_word3 a zm:ExtensionField ;
+    rdfs:label "Extension Word 3: Unicode Translation Table Address" ;
+    zm:wordIndex 3 ;
+    zm:applicableFrom zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Address of Unicode translation table (optional)." .
+
+zm:ext_word4 a zm:ExtensionField ;
+    rdfs:label "Extension Word 4: Flags 3" ;
+    zm:wordIndex 4 ;
+    zm:applicableFrom zm:v5 ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Flags 3 register. All unused bits must be cleared by the interpreter." ;
+    zm:containsBit zm:flags3_bit0 .
+
+zm:flags3_bit0 a zm:BitField ;
+    rdfs:label "Flags 3 bit 0: Game wants transparency (V6)" ;
+    zm:bitPosition 0 ;
+    zm:applicableFrom zm:v6 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "Game wants to use transparency. Interpreter clears if it cannot provide." .
+
+zm:ext_word5 a zm:ExtensionField ;
+    rdfs:label "Extension Word 5: True Default Foreground Colour" ;
+    zm:wordIndex 5 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "True default foreground colour." .
+
+zm:ext_word6 a zm:ExtensionField ;
+    rdfs:label "Extension Word 6: True Default Background Colour" ;
+    zm:wordIndex 6 ;
+    zm:applicableFrom zm:v5 ;
+    zm:mutatedBy zm:interpreter ;
+    zm:mustResetOnRestore true ;
+    zm:hasSourceAuthority zm:normative ;
+    zm:description "True default background colour." .
