@@ -25,15 +25,11 @@ zm:HeaderField a owl:Class ;
 zm:FlagsRegister a owl:Class ;
     rdfs:subClassOf zm:HeaderField ;
     rdfs:label "Flags Register" ;
-    rdfs:comment """A header field whose value is a bitfield container rather
-        than a simple scalar. Access semantics operate at the individual bit
-        level via BitField individuals.""" .
+    rdfs:comment """A header field whose value is a bitfield container rather than a simple scalar. Access semantics operate at the individual bit level via BitField individuals.""" .
 
 zm:BitField a owl:Class ;
     rdfs:label "Bit Field" ;
-    rdfs:comment """An individual bit within a FlagsRegister. Has its own
-        version applicability and access authority, which may differ from
-        the parent register.""" .
+    rdfs:comment """An individual bit within a FlagsRegister. Has its own version applicability and access authority, which may differ from the parent register.""" .
 
 zm:HeaderExtensionTable a owl:Class ;
     rdfs:label "Header Extension Table" ;
@@ -41,9 +37,7 @@ zm:HeaderExtensionTable a owl:Class ;
 
 zm:ExtensionField a owl:Class ;
     rdfs:label "Extension Field" ;
-    rdfs:comment """A field within the HeaderExtensionTable, addressed by word
-        index rather than byte offset. Parallel to HeaderField but accessed
-        indirectly via the extension table pointer.""" .
+    rdfs:comment """A field within the HeaderExtensionTable, addressed by word index rather than byte offset. Parallel to HeaderField but accessed indirectly via the extension table pointer.""" .
 
 zm:ZMachineVersion a owl:Class ;
     rdfs:label "Z-Machine Version" ;
@@ -59,10 +53,7 @@ zm:FieldType a owl:Class ;
 
 zm:SourceAuthority a owl:Class ;
     rdfs:label "Source Authority" ;
-    rdfs:comment """Whether a field is defined normatively (Section 11) or
-        conventionally (Appendix B). Normative fields must be handled by a
-        conforming interpreter. Conventional fields reflect observed practice
-        in Infocom and Inform games.""" .
+    rdfs:comment """Whether a field is defined normatively (Section 11) or conventionally (Appendix B). Normative fields must be handled by a conforming interpreter. Conventional fields reflect observed practice in Infocom and Inform games.""" .
 
 
 # ============================================================================
@@ -235,9 +226,7 @@ zm:pointerTo a owl:ObjectProperty ;
 
 zm:supersededBy a owl:ObjectProperty ;
     rdfs:label "superseded by" ;
-    rdfs:comment """Relates a HeaderField to the HeaderField that replaces its
-        meaning at the same offset from a given version onward. Used to model
-        the Version 5/6 font field swap at offsets 0x26 and 0x27.""" ;
+    rdfs:comment """Relates a HeaderField to the HeaderField that replaces its meaning at the same offset from a given version onward. Used to model the Version 5/6 font field swap at offsets 0x26 and 0x27.""" ;
     rdfs:domain zm:HeaderField ;
     rdfs:range zm:HeaderField .
 
@@ -317,9 +306,7 @@ zm:flags1_v13_bit3_tandy a zm:BitField ;
     zm:applicableUntil zm:v3 ;
     zm:mutatedBy zm:interpreter ;
     zm:hasSourceAuthority zm:conventional ;
-    zm:description """The legendary Tandy bit. When set, some Infocom games
-        (notably Zork I and The Witness) suppress or soften content deemed
-        offensive by the Tandy Corporation, which sold early Infocom titles """ .
+    zm:description """The legendary Tandy bit. When set, some Infocom games (notably Zork I and The Witness) suppress or soften content deemed offensive by the Tandy Corporation, which sold early Infocom titles """ .
 
 zm:flags1_v13_bit4 a zm:BitField ;
     rdfs:label "Flags 1 bit 4: Status line not available (V1-3)" ;
@@ -436,9 +423,7 @@ zm:field_release_number a zm:HeaderField ;
     zm:hasFieldType zm:wordValue ;
     zm:applicableFrom zm:v1 ;
     zm:hasSourceAuthority zm:conventional ;
-    zm:description """Release number of the story file. Written by Infocom and
-        Inform compilers. Not defined in Section 11 but universally present
-        in practice.""" .
+    zm:description """Release number of the story file. Written by Infocom and Inform compilers. Not defined in Section 11 but universally present in practice.""" .
 
 
 # --- 0x04: High Memory Base ---
@@ -727,9 +712,7 @@ zm:field_interpreter_version a zm:HeaderField ;
     zm:mutatedBy zm:interpreter ;
     zm:mustResetOnRestore true ;
     zm:hasSourceAuthority zm:normative ;
-    zm:description """Interpreter version. Conventionally an ASCII code for an
-        uppercase letter in Versions 4 and 5; Version 6 interpreters store
-        numbers here instead.""" .
+    zm:description """Interpreter version. Conventionally an ASCII code for an uppercase letter in Versions 4 and 5; Version 6 interpreters store numbers here instead.""" .
 
 
 # --- 0x20: Screen Height ---
@@ -983,8 +966,7 @@ zm:field_inform_version a zm:HeaderField ;
     zm:hasFieldType zm:byteValue ;
     zm:applicableFrom zm:v1 ;
     zm:hasSourceAuthority zm:conventional ;
-    zm:description """Four bytes of ASCII storing the version of Inform used to compile the file, e.g. '6.11'. Written by Inform 6; not present in
-        Infocom or earlier Inform files.""" .
+    zm:description """Four bytes of ASCII storing the version of Inform used to compile the file, e.g. '6.11'. Written by Inform 6; not present in Infocom or earlier Inform files.""" .
 
 
 # ============================================================================
