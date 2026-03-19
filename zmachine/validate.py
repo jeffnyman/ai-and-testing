@@ -1,5 +1,5 @@
 """
-validate_ontology.py
+validate.py
 
 Validation script for the Z-Machine header ontology.
 Runs a sequence of checks in increasing specificity:

@@ -1,5 +1,5 @@
 """
-zmachine_header_reference.py
+reference.py
 
 Reference implementation of the Z-Machine header parser.
 
@@ -27,7 +27,7 @@ Output structure:
   }
 
 Usage:
-  python zmachine_header_reference.py path/to/story.z5
+  python reference.py path/to/story.z5
 """
 
 import json

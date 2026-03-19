@@ -1,5 +1,5 @@
 """
-generate_parser.py
+generate.py
 
 Sends the Z-Machine header parsing prompt to a local Ollama model,
 injecting the three source documents (normative spec, conventional spec,
@@ -9,7 +9,7 @@ The model's response is printed to stdout and also saved to
 zmachine_header.py in the same directory as this script.
 
 Usage:
-    python generate_parser.py
+    python generate.py
 
 Requirements:
     - Ollama running locally (default: http://localhost:11434)
